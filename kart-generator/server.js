@@ -45,15 +45,18 @@ app.post('/generate-card', upload.fields([
     const data = req.body;
     const files = req.files;
 
-    console.log('Gelen Veriler:', data);
-    console.log('Yüklenen Dosyalar:', files);
+    // Gelen metin verileri ile dosya yollarını birleştir
+    const combinedData = {
+        ...data,
+        photoPath: files.front_photo ? files.front_photo[0].path : null,
+        qrPath: files.back_qr ? files.back_qr[0].path : null
+    };
 
-    // Dosyaların tam yollarını al
-    const photoPath = files.front_photo ? files.front_photo[0].path : null;
-    const qrPath = files.back_qr ? files.back_qr[0].path : null;
+    // Bu verileri geçici bir JSON dosyasına yaz
+    const tempDataPath = path.join(__dirname, 'tmp-data.json');
+    fs.writeFileSync(tempDataPath, JSON.stringify(combinedData, null, 2));
 
-    // JSON verisini string'e çevir ve tırnak işaretlerinden kaç
-    const jsonData = JSON.stringify(data).replace(/"/g, '\\"');
+    console.log('Veriler geçici dosyaya yazıldı:', tempDataPath);
 
     // Illustrator scriptinin tam yolu
     const scriptPath = path.join(__dirname, 'illustrator-script.jsx');
@@ -62,14 +65,14 @@ app.post('/generate-card', upload.fields([
     let command;
     const platform = os.platform();
 
-    if (platform === 'darwin') { // macOS
-        // AppleScript kullanarak Illustrator'a JavaScript dosyasını argümanlarla çalıştırmasını söyle
-        command = `osascript -e 'tell application "Adobe Illustrator" to do javascript file "${scriptPath}" with arguments {"${jsonData}", "${photoPath || ''}", "${qrPath || ''}"}'`;
+    if (platform === 'darwin') { // macOS (Hala eski yöntemle çalışabilir)
+        const jsonData = JSON.stringify(combinedData).replace(/"/g, '\\"');
+        command = `osascript -e 'tell application "Adobe Illustrator" to do javascript file "${scriptPath}" with arguments {"${jsonData}"}'`;
     } else if (platform === 'win32') { // Windows
         // DİKKAT: Bu yolu kendi bilgisayarınızdaki Illustrator sürümüne göre güncellemeniz gerekebilir.
         const illustratorPath = "C:\\Program Files\\Adobe\\Adobe Illustrator 2025\\Support Files\\Contents\\Windows\\Illustrator.exe";
+        // Windows için script'i doğrudan çalıştır, script veriyi dosyadan okuyacak
         command = `"${illustratorPath}" -run "${scriptPath}"`;
-        console.warn("Windows komutu deneyseldir ve doğrudan çalışmayabilir.");
     } else {
         return res.status(500).send('Desteklenmeyen işletim sistemi.');
     }
