@@ -22,19 +22,12 @@ throw new SyntaxError('JSON.parse');};}}());
 
 #target illustrator
 
-// Bu script, Adobe Illustrator'da açık olan aktif belgeyi
-// dışarıdan gelen verilerle (metin ve resim yolları) günceller.
-
 (function() {
 
-    /**
-     * Geçici JSON veri dosyasını okur ve içeriğini bir nesne olarak döndürür.
-     */
     function readDataFromFile() {
         var scriptFile = new File($.fileName);
         var scriptFolder = scriptFile.parent;
         var dataFile = new File(scriptFolder.fsName + '/tmp-data.json');
-
         if (dataFile.exists) {
             try {
                 dataFile.open('r');
@@ -45,60 +38,64 @@ throw new SyntaxError('JSON.parse');};}}());
                 alert("Geçici veri dosyası ('tmp-data.json') okunamadı veya bozuk.\nHata: " + e);
                 return null;
             }
-        } else {
-            return null;
         }
+        return null;
     }
 
-    // Ana fonksiyon
     function updateDocument() {
         if (app.documents.length === 0) {
             alert("Lütfen önce güncellenecek Illustrator dosyasını açın.");
             return;
         }
 
-        var data = null;
-
-        data = readDataFromFile();
-
-        if (!data && typeof arguments !== 'undefined' && arguments.length > 0) {
-           try {
-                data = JSON.parse(arguments[0]);
-           } catch(e) {
-               alert("Script'e gönderilen veri (argüman) JSON formatında değil.");
-               return;
-           }
-        }
-
+        var data = readDataFromFile();
         if (!data) {
-            alert("Gerekli veriler scripte gönderilemedi. Sunucu tarafını veya 'tmp-data.json' dosyasını kontrol edin.");
+             alert("Gerekli veriler scripte gönderilemedi. Sunucu tarafını veya 'tmp-data.json' dosyasını kontrol edin.");
             return;
         }
 
         var doc = app.activeDocument;
 
+        /**
+         * Belirtilen isimdeki TÜM katmanları bulur ve içlerindeki metin alanlarını günceller.
+         * @param {string} layerName - Güncellenecek katmanların adı.
+         * @param {string} text - Yazılacak yeni metin.
+         */
         function updateText(layerName, text) {
             if (typeof text === 'undefined' || text === null) return;
-            try {
-                var layer = doc.layers.getByName(layerName);
-                layer.locked = false;
-                layer.visible = true;
-                if (layer.textFrames.length > 0) {
-                    layer.textFrames[0].contents = text;
+            for (var i = 0; i < doc.layers.length; i++) {
+                var currentLayer = doc.layers[i];
+                if (currentLayer.name === layerName) {
+                    try {
+                        currentLayer.locked = false;
+                        currentLayer.visible = true;
+                        if (currentLayer.textFrames.length > 0) {
+                            currentLayer.textFrames[0].contents = text;
+                        }
+                    } catch (e) { /* Hata olursa bu katmanı atla */ }
                 }
-            } catch (e) { /* Katman bulunamazsa atla */ }
+            }
         }
 
+        /**
+         * Belirtilen isimdeki TÜM katmanları bulur ve içlerindeki görselleri günceller.
+         * @param {string} layerName - Güncellenecek katmanların adı.
+         * @param {string} imagePath - Yeni resmin dosya yolu.
+         */
         function updateImage(layerName, imagePath) {
             if (!imagePath) return;
-            try {
-                var layer = doc.layers.getByName(layerName);
-                layer.locked = false;
-                layer.visible = true;
-                if (layer.placedItems.length > 0) {
-                    layer.placedItems[0].file = new File(imagePath);
+            for (var i = 0; i < doc.layers.length; i++) {
+                var currentLayer = doc.layers[i];
+                if (currentLayer.name === layerName) {
+                    try {
+                        currentLayer.locked = false;
+                        currentLayer.visible = true;
+                        if (currentLayer.placedItems.length > 0) {
+                            currentLayer.placedItems[0].file = new File(imagePath);
+                        }
+                    } catch (e) { /* Hata olursa bu katmanı atla */ }
                 }
-            } catch (e) { /* Katman bulunamazsa atla */ }
+            }
         }
 
         // --- Veri Güncelleme İşlemleri ---
@@ -106,6 +103,7 @@ throw new SyntaxError('JSON.parse');};}}());
         updateText('front_surname_layer', data.surname);
         updateText('front_tc_layer', data.tc_no);
         updateText('front_id_layer', data.id_no);
+        updateText('white_card_id_layer', data.white_card_id); // Beyaz Kart sicil nosu için eklendi
         updateText('back_mother_layer', data.mother_name);
         updateText('back_father_layer', data.father_name);
         updateText('back_start_date_layer', data.start_date);
@@ -113,6 +111,7 @@ throw new SyntaxError('JSON.parse');};}}());
 
         var fullName = (data.name || '') + ' ' + (data.surname || '');
         updateText('front_fullname_layer', fullName.toUpperCase());
+        updateText('doc_fullname_layer', fullName.toUpperCase()); // Görev Belgesi için eklendi
 
         updateText('front_phone_layer', data.phone);
         updateText('front_plate_layer', data.plate);
@@ -124,6 +123,6 @@ throw new SyntaxError('JSON.parse');};}}());
         updateImage('qr_code_layer', data.qrPath);
     }
 
-    updateDocument.apply(this, arguments);
+    updateDocument();
 
 })();
