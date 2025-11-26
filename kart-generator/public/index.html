@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polis Gazetesi Kart Oluşturucu</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Personel Kart Bilgileri</h1>
+        <form id="card-form">
+            <h2>Genel Bilgiler</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="name">Adı:</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="surname">Soyadı:</label>
+                    <input type="text" id="surname" name="surname" required>
+                </div>
+                <div class="form-group">
+                    <label for="tc_no">T.C. Kimlik No:</label>
+                    <input type="text" id="tc_no" name="tc_no" required>
+                </div>
+                <div class="form-group">
+                    <label for="id_no">Sicil No (Genel):</label>
+                    <input type="text" id="id_no" name="id_no" required>
+                </div>
+                <div class="form-group">
+                    <label for="white_card_id">Beyaz Kart Sicil No (Özel):</label>
+                    <input type="text" id="white_card_id" name="white_card_id">
+                </div>
+                <div class="form-group">
+                    <label for="mother_name">Anne Adı:</label>
+                    <input type="text" id="mother_name" name="mother_name" required>
+                </div>
+                <div class="form-group">
+                    <label for="father_name">Baba Adı:</label>
+                    <input type="text" id="father_name" name="father_name" required>
+                </div>
+                 <div class="form-group">
+                    <label for="phone">GSM:</label>
+                    <input type="text" id="phone" name="phone">
+                </div>
+            </div>
+
+            <h2>Tarih Bilgileri</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="start_date">Görev Başlangıç Tarihi:</label>
+                    <input type="text" id="start_date" name="start_date">
+                </div>
+                <div class="form-group">
+                    <label for="end_date">Görev Bitiş Tarihi:</label>
+                    <input type="text" id="end_date" name="end_date">
+                     <small>Veya "GÖREVLİ OLDUĞU SÜRECE" yazın</small>
+                </div>
+            </div>
+
+            <h2>Görev Otosu Bilgileri (İsteğe Bağlı)</h2>
+             <div class="form-grid">
+                <div class="form-group">
+                    <label for="plate">Araç Plakası:</label>
+                    <input type="text" id="plate" name="plate">
+                </div>
+             </div>
+
+            <h2>Görseller</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="front_photo">Personel Fotoğrafı:</label>
+                    <input type="file" id="front_photo" name="front_photo" accept="image/*">
+                </div>
+                <div class="form-group">
+                    <label for="back_qr">QR Kod:</label>
+                    <input type="file" id="back_qr" name="back_qr" accept="image/*">
+                </div>
+            </div>
+
+            <button type="submit">Kartları Oluştur</button>
+        </form>
+        <div id="response-message"></div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
